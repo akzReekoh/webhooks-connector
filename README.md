@@ -9,6 +9,6 @@ Webhooks Connector Plugin for the Reekoh IoT Platform. Integrates a Reekoh insta
 # Description
 This plugin sends data from devices connected to the Reekoh Instance to any HTTP source/endpoint of choice.
 
-# Cofiguration
+# Configuration
 To configure this plugin a Webhook URL is needed. All data from the devices will be sent to this URL.
 This Webhook URL is then injected to the plugin from the platform.
