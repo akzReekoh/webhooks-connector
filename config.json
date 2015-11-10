@@ -1,0 +1,8 @@
+{
+  "webhook_url": {
+	"label": "Webhook URL",
+	"type": "String",
+	"required": true,
+	"help": "Please provide your webhook url."
+  }
+}
