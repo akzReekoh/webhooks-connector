@@ -16,6 +16,12 @@ platform.on('data', function (data) {
             body: data
         }, function (error, response, body) {
             if (error) platform.handleException(error);
+            else{
+                platform.log(JSON.stringify({
+                    title: 'Data sent to webhook.',
+                    data: data
+                }));
+            }
         });
     }else
         platform.log('Invalid data received');
