@@ -2,23 +2,35 @@
 
 var platform = require('./platform'),
     request = require('request'),
-    isJSON = require('is-json'),
 	webHook;
 
 /*
  * Listen for the data event.
  */
 platform.on('data', function (data) {
-    if(isJSON(data, true)) {
+    var domain = require('domain'),
+        d = domain.create();
+
+    d.once('error', function (error) {
+        platform.handleException(error);
+    });
+
+    d.run(function () {
         request.post({
             url: webHook,
             json: true,
             body: data
         }, function (error, response, body) {
             if (error) platform.handleException(error);
+            else{
+                platform.log(JSON.stringify({
+                    title: 'Data sent to webhook.',
+                    data: data
+                }));
+            }
         });
-    }else
-        platform.log('Invalid data received');
+    });
+    d.exit();
 });
 
 /*
