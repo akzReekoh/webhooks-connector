@@ -28,9 +28,9 @@ platform.on('data', function (data) {
                     data: data
                 }));
             }
+            d.exit();
         });
     });
-    d.exit();
 });
 
 /*
