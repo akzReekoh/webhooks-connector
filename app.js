@@ -1,21 +1,15 @@
 'use strict';
 
-var domain   = require('domain'),
-	request  = require('request'),
-	platform = require('./platform'),
+var request       = require('request'),
+	platform      = require('./platform'),
+	isPlainObject = require('lodash.isplainobject'),
 	webHook;
 
 /*
  * Listen for the data event.
  */
 platform.on('data', function (data) {
-	var d = domain.create();
-
-	d.once('error', function (error) {
-		platform.handleException(error);
-	});
-
-	d.run(function () {
+	if (isPlainObject(data)) {
 		request.post({
 			url: webHook,
 			json: true,
@@ -29,10 +23,10 @@ platform.on('data', function (data) {
 					data: data
 				}));
 			}
-
-			d.exit();
 		});
-	});
+	}
+	else
+		platform.handleException(new Error('Invalid data received. Must be a valid JSON Object. Data ' + data));
 });
 
 /*
