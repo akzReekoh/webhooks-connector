@@ -3,13 +3,11 @@
 var request       = require('request'),
 	platform      = require('./platform'),
 	isPlainObject = require('lodash.isplainobject'),
+    isArray       = require('lodash.isarray'),
 	webHook;
 
-/*
- * Listen for the data event.
- */
 platform.on('data', function (data) {
-	if (isPlainObject(data)) {
+	if (isPlainObject(data) || isArray(data)) {
 		request.post({
 			url: webHook,
 			json: true,
@@ -26,19 +24,13 @@ platform.on('data', function (data) {
 		});
 	}
 	else
-		platform.handleException(new Error('Invalid data received. Must be a valid JSON Object. Data ' + data));
+		platform.handleException(new Error('Invalid data received. Must be a valid Array or JSON Object. Data ' + data));
 });
 
-/*
- * Event to listen to in order to gracefully release all resources bound to this service.
- */
 platform.on('close', function () {
 	platform.notifyClose();
 });
 
-/*
- * Listen for the ready event.
- */
 platform.once('ready', function (options) {
 	webHook = options.webhook_url;
 
