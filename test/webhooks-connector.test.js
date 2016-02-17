@@ -1,6 +1,6 @@
 'use strict';
 
-const WEBHOOK_URL = 'https://endpoint1.collection.us2.sumologic.com/receiver/v1/http/ZaVnC4dhaV2Go4vCe8vI_ksTgTInUF3ya_0v7vQ7RrTo3qbbA08VxSaJAM1XQe_lnTSbvB460lfPKJPOgD-xQo14-uLkRg9C6V4rwdkNKbMWOMxUzfmsoQ==';
+const WEBHOOK_URL = 'http://requestb.in/10sfd4a1';
 
 var cp     = require('child_process'),
 	assert = require('assert'),
@@ -9,9 +9,12 @@ var cp     = require('child_process'),
 describe('Connector', function () {
 	this.slow(5000);
 
-	after('terminate child process', function () {
+	after('terminate child process', function (done) {
+        this.timeout(7000);
+
         setTimeout(function(){
             connector.kill('SIGKILL');
+            done();
         }, 5000);
 	});
 
@@ -44,7 +47,7 @@ describe('Connector', function () {
 	});
 
 	describe('#data', function (done) {
-		it('should process the data', function () {
+		it('should process the JSON data', function () {
 			connector.send({
 				type: 'data',
 				data: JSON.stringify({
@@ -54,4 +57,14 @@ describe('Connector', function () {
 			}, done);
 		});
 	});
+
+    describe('#data', function (done) {
+        it('should process the Array data', function () {
+            var data = ['Test message', 'This is a test message from webhook connector'];
+            connector.send({
+                type: 'data',
+                data: data
+            }, done);
+        });
+    });
 });
