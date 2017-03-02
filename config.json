@@ -1,8 +1,12 @@
 {
-  "webhook_url": {
+  "webhookUrl": {
 	"label": "Webhook URL",
 	"type": "String",
 	"required": true,
-	"help": "Please provide your webhook url."
+	"help": "Please provide your webhook url.",
+    "maxLength": 50,
+    "format": {
+      "pattern": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$"
+    }
   }
 }

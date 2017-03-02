@@ -1,70 +1,59 @@
-'use strict';
+'use strict'
 
-const WEBHOOK_URL = 'http://requestb.in/10sfd4a1';
+const amqp = require('amqplib')
 
-var cp     = require('child_process'),
-	assert = require('assert'),
-	connector;
+const WEBHOOK_URL = 'http://requestb.in/1b6y5661'
 
-describe('Connector', function () {
-	this.slow(5000);
+let _channel = null
+let _conn = null
+let app = null
 
-	after('terminate child process', function (done) {
-        this.timeout(7000);
+describe('Webhooks Connector Test', () => {
+  before('init', () => {
+    process.env.ACCOUNT = 'adinglasan'
+    process.env.CONFIG = JSON.stringify({
+      webhookUrl: WEBHOOK_URL
+    })
+    process.env.INPUT_PIPE = 'ip.webhook'
+    process.env.LOGGERS = 'logger1, logger2'
+    process.env.EXCEPTION_LOGGERS = 'ex.logger1, ex.logger2'
+    process.env.BROKER = 'amqp://guest:guest@127.0.0.1/'
 
-        setTimeout(function(){
-            connector.kill('SIGKILL');
-            done();
-        }, 5000);
-	});
+    amqp.connect(process.env.BROKER)
+      .then((conn) => {
+        _conn = conn
+        return conn.createChannel()
+      }).then((channel) => {
+      _channel = channel
+    }).catch((err) => {
+      console.log(err)
+    })
+  })
 
-	describe('#spawn', function () {
-		it('should spawn a child process', function () {
-			assert.ok(connector = cp.fork(process.cwd()), 'Child process not spawned.');
-		});
-	});
+  after('close connection', function (done) {
+    _conn.close()
+    done()
+  })
 
-	describe('#handShake', function () {
-		it('should notify the parent process when ready within 5 seconds', function (done) {
-			this.timeout(5000);
+  describe('#start', function () {
+    it('should start the app', function (done) {
+      this.timeout(10000)
+      app = require('../app')
+      app.once('init', done)
+    })
+  })
 
-			connector.on('message', function (message) {
-				if (message.type === 'ready')
-					done();
-			});
+  describe('#data', () => {
+    it('should send data to third party client', function (done) {
+      this.timeout(15000)
 
-			connector.send({
-				type: 'ready',
-				data: {
-					options: {
-						webhook_url: WEBHOOK_URL
-					}
-				}
-			}, function (error) {
-				assert.ifError(error);
-			});
-		});
-	});
+      let data = {
+        title : 'Test message',
+        message : 'This is a test message from webhook connector'
+      }
 
-	describe('#data', function (done) {
-		it('should process the JSON data', function () {
-			connector.send({
-				type: 'data',
-				data: JSON.stringify({
-					title : 'Test message',
-                    message : 'This is a test message from webhook connector'
-				})
-			}, done);
-		});
-	});
-
-    describe('#data', function (done) {
-        it('should process the Array data', function () {
-            var data = ['Test message', 'This is a test message from webhook connector'];
-            connector.send({
-                type: 'data',
-                data: data
-            }, done);
-        });
-    });
-});
+      _channel.sendToQueue('ip.webhook', new Buffer(JSON.stringify(data)))
+      setTimeout(done, 10000)
+    })
+  })
+})
